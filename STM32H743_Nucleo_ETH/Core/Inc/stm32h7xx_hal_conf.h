@@ -224,9 +224,9 @@
 #define ETH_TX_DESC_CNT         4U  /* number of Ethernet Tx DMA descriptors */
 #define ETH_RX_DESC_CNT         4U  /* number of Ethernet Rx DMA descriptors */
 
-#define ETH_MAC_ADDR0    (0x02UL)
-#define ETH_MAC_ADDR1    (0x00UL)
-#define ETH_MAC_ADDR2    (0x00UL)
+#define ETH_MAC_ADDR0    (0x00UL)
+#define ETH_MAC_ADDR1    (0x80UL)
+#define ETH_MAC_ADDR2    (0xE1UL)
 #define ETH_MAC_ADDR3    (0x00UL)
 #define ETH_MAC_ADDR4    (0x00UL)
 #define ETH_MAC_ADDR5    (0x00UL)

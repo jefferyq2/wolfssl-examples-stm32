@@ -51,14 +51,22 @@
 #define NO_FILESYSTEM
 #define NO_MAIN_DRIVER
 #define WOLFTPM_EXAMPLE_HAL
+#define WOLFTPM_NO_LOCK
 
 /* Set smaller default timeout for embedded devices */
 #define TPM_TIMEOUT_TRIES 10000
 
+#include "stm32h7xx_hal.h"
+extern SPI_HandleTypeDef hspi2;
+#define TPM2_IOCB_CTX &hspi2
+
 /* Example for TPM wait delay */
-#if 0
+#if 1
     #define XTPM_WAIT() HAL_Delay(1)
 #endif
+
+/* pull in wolfSSL build settings */
+#include "wolfSSL.I-CUBE-wolfSSL_conf.h"
 
 /* ------------------------------------------------------------------------- */
 /* Enable Features */
@@ -96,22 +104,28 @@
 #endif
 
 /* TPM Hardware Type (default automatic detect) */
-#if 1
+#if 0
     #define WOLFTPM_AUTODETECT
 #else
     //#define WOLFTPM_SLB9670   /* Infineon */
     //#define WOLFTPM_SLB9672   /* Infineon */
     //#define WOLFTPM_MICROCHIP /* ATTPM20 */
-    //#define WOLFTPM_ST33      /* STM */
+    #define WOLFTPM_ST33      /* STM */
     //#define WOLFTPM_NUVOTON   /* NPCT75x */
 #endif
 
 /* Example STM32 SPI Hal Configuration */
-#if 0
-    /* Use PD14 for SPI1 CS */
+#if 1
+    /* Use PD4 for SPI2 CS */
     #define USE_SPI_CS_PORT GPIOD
-    #define USE_SPI_CS_PIN  14
+    #define USE_SPI_CS_PIN  4
 #endif
+
+//#define WOLFTPM_PROVISIONING
+#define WOLFTPM_MFG_IDENTITY
+
+/* use mutex lock on TPM access */
+//#define WOLFTPM_TIS_LOCK
 
 /* ------------------------------------------------------------------------- */
 /* Debugging */

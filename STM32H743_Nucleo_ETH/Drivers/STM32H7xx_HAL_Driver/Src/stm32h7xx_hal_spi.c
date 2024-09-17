@@ -1606,6 +1606,12 @@ HAL_StatusTypeDef HAL_SPI_TransmitReceive(SPI_HandleTypeDef *hspi, const uint8_t
             return HAL_TIMEOUT;
           }
         }
+
+        /* !!!! PATCH FOR 8-bit SPI! !!! */
+        /* if tx filled, clear flag */
+        if (__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_TXTF)) {
+          __HAL_SPI_CLEAR_TXTFFLAG(hspi);
+        }
       }
     }
   }

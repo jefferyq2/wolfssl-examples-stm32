@@ -73,7 +73,7 @@
 #define WOLF_CONF_CHAPOLY      1
 
 /*---------- WOLF_CONF_EDCURVE25519 -----------*/
-#define WOLF_CONF_EDCURVE25519      0
+#define WOLF_CONF_EDCURVE25519      1
 
 /*---------- WOLF_CONF_MD5 -----------*/
 #define WOLF_CONF_MD5      0
@@ -88,10 +88,10 @@
 #define WOLF_CONF_SHA2_256      1
 
 /*---------- WOLF_CONF_SHA2_384 -----------*/
-#define WOLF_CONF_SHA2_384      0
+#define WOLF_CONF_SHA2_384      1
 
 /*---------- WOLF_CONF_SHA2_512 -----------*/
-#define WOLF_CONF_SHA2_512      0
+#define WOLF_CONF_SHA2_512      1
 
 /*---------- WOLF_CONF_SHA3 -----------*/
 #define WOLF_CONF_SHA3      0
@@ -166,7 +166,7 @@
     #undef  NO_STM32_HASH
     #undef  NO_STM32_CRYPTO
     #define HAL_CONSOLE_UART huart3
-#elif defined(STM32H723xx) || defined(STM32H725xx)
+#elif defined(STM32H723xx) || defined(STM32H725xx) || defined(STM32H743xx)
     #define WOLFSSL_STM32H7
     #define HAL_CONSOLE_UART huart3
 #elif defined(STM32L4A6xx)
@@ -253,8 +253,10 @@
 #define WOLFSSL_GENERAL_ALIGNMENT 4
 #define WOLFSSL_STM32_CUBEMX
 #define WOLFSSL_SMALL_STACK
-#define WOLFSSL_USER_IO
-#define WOLFSSL_NO_SOCK
+//#define WOLFSSL_USER_IO
+#define WOLFSSL_LWIP
+//#define WOLFSSL_LWIP_NATIVE
+//#define WOLFSSL_NO_SOCK
 #define WOLFSSL_IGNORE_FILE_WARN
 
 /* ------------------------------------------------------------------------- */
@@ -383,8 +385,9 @@
 #endif
 
 /* TLS Session Cache */
-#if 0
+#if 1
     #define SMALL_SESSION_CACHE
+    #define HAVE_SESSION_TICKET
 #else
     #define NO_SESSION_CACHE
 #endif
@@ -430,7 +433,7 @@
     //#define HAVE_ECC192
     //#define HAVE_ECC224
     #undef NO_ECC256
-    //#define HAVE_ECC384
+    #define HAVE_ECC384
     //#define HAVE_ECC521
 
     /* Fixed point cache (speeds repeated operations against same private key) */
@@ -488,7 +491,7 @@
     #define HAVE_AESGCM
     /* GCM Method: GCM_SMALL, GCM_WORD32, GCM_TABLE or GCM_TABLE_4BIT */
     /* GCM_TABLE is about 4K larger and 3x faster for GHASH */
-    #define GCM_SMALL
+    #define GCM_TABLE_4BIT
     #define HAVE_AES_DECRYPT
 #endif
 
@@ -497,8 +500,12 @@
     #define HAVE_AES_DECRYPT
 #endif
 
+/* TPM Required */
+#define WOLF_CRYPTO_CB
+#define WOLFSSL_PUBLIC_MP
+
 /* Other possible AES modes */
-//#define WOLFSSL_AES_CFB /* Used by TPM parameter encryption */
+#define WOLFSSL_AES_CFB /* Used by TPM parameter encryption */
 //#define WOLFSSL_AES_COUNTER
 //#define HAVE_AESCCM
 //#define WOLFSSL_AES_XTS
@@ -527,7 +534,7 @@
     #define HAVE_ED25519
 
     /* Optionally use small math (less flash usage, but much slower) */
-    #define CURVED25519_SMALL
+    //#define CURVED25519_SMALL
 #endif
 
 /* ------------------------------------------------------------------------- */
