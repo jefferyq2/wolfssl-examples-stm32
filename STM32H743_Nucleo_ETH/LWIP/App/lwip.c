@@ -45,9 +45,6 @@ struct netif gnetif;
 ip4_addr_t ipaddr;
 ip4_addr_t netmask;
 ip4_addr_t gw;
-uint8_t IP_ADDRESS[4];
-uint8_t NETMASK_ADDRESS[4];
-uint8_t GATEWAY_ADDRESS[4];
 /* USER CODE BEGIN OS_THREAD_ATTR_CMSIS_RTOS_V2 */
 #define INTERFACE_THREAD_STACK_SIZE ( 1024 )
 osThreadAttr_t attributes;
@@ -61,6 +58,23 @@ static inline void tcpip_init_wrap(tcpip_init_done_fn tcpip_init_done, void *arg
 	LOCK_TCPIP_CORE();
 }
 #define tcpip_init tcpip_init_wrap
+
+#if LWIP_NETIF_EXT_STATUS_CALLBACK
+static netif_ext_callback_t ext_cb;
+static void netif_ext_callback_ip(struct netif* netif, netif_nsc_reason_t reason, const netif_ext_callback_args_t* args)
+{
+  if (netif != NULL) {
+    printf("IP: %d.%d.%d.%d\n",
+            (int)((netif->ip_addr.addr >>  0) & 0xFF),
+            (int)((netif->ip_addr.addr >>  8) & 0xFF),
+            (int)((netif->ip_addr.addr >> 16) & 0xFF),
+            (int)((netif->ip_addr.addr >> 24) & 0xFF)
+          );
+  }
+  (void)reason;
+  (void)args;
+}
+#endif
 /* USER CODE END 2 */
 
 /**
@@ -68,31 +82,13 @@ static inline void tcpip_init_wrap(tcpip_init_done_fn tcpip_init_done, void *arg
   */
 void MX_LWIP_Init(void)
 {
-  /* IP addresses initialization */
-  IP_ADDRESS[0] = 192;
-  IP_ADDRESS[1] = 168;
-  IP_ADDRESS[2] = 1;
-  IP_ADDRESS[3] = 10;
-  NETMASK_ADDRESS[0] = 255;
-  NETMASK_ADDRESS[1] = 255;
-  NETMASK_ADDRESS[2] = 255;
-  NETMASK_ADDRESS[3] = 0;
-  GATEWAY_ADDRESS[0] = 0;
-  GATEWAY_ADDRESS[1] = 0;
-  GATEWAY_ADDRESS[2] = 0;
-  GATEWAY_ADDRESS[3] = 0;
-
-/* USER CODE BEGIN IP_ADDRESSES */
-
-/* USER CODE END IP_ADDRESSES */
-
-  /* Initilialize the LwIP stack with RTOS */
+  /* Initialize the LwIP stack with RTOS */
   tcpip_init( NULL, NULL );
 
-  /* IP addresses initialization without DHCP (IPv4) */
-  IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
-  IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1] , NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-  IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
+  /* IP addresses initialization with DHCP (IPv4) */
+  ipaddr.addr = 0;
+  netmask.addr = 0;
+  gw.addr = 0;
 
   /* add the network interface (IPv4/IPv6) with RTOS */
   netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, &ethernetif_init, &tcpip_input);
@@ -100,16 +96,8 @@ void MX_LWIP_Init(void)
   /* Registers the default network interface */
   netif_set_default(&gnetif);
 
-  if (netif_is_link_up(&gnetif))
-  {
-    /* When the netif is fully configured this function must be called */
-    netif_set_up(&gnetif);
-  }
-  else
-  {
-    /* When the netif link is down this function must be called */
-    netif_set_down(&gnetif);
-  }
+  /* We must always bring the network interface up connection or not... */
+  netif_set_up(&gnetif);
 
   /* Set the link callback function, this function is called on change of link status*/
   netif_set_link_callback(&gnetif, ethernet_link_status_updated);
@@ -123,7 +111,13 @@ void MX_LWIP_Init(void)
   osThreadNew(ethernet_link_thread, &gnetif, &attributes);
 /* USER CODE END H7_OS_THREAD_NEW_CMSIS_RTOS_V2 */
 
+  /* Start DHCP negotiation for a network interface (IPv4) */
+  dhcp_start(&gnetif);
+
 /* USER CODE BEGIN 3 */
+#if LWIP_NETIF_EXT_STATUS_CALLBACK
+  netif_add_ext_callback(&ext_cb, netif_ext_callback_ip);
+#endif
   /* ETH_CODE: call UNLOCK_TCPIP_CORE after we are done */
   UNLOCK_TCPIP_CORE();
 /* USER CODE END 3 */
