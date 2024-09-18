@@ -317,7 +317,7 @@
     #if defined(WOLF_CONF_ECC) && WOLF_CONF_ECC == 1
         #define WOLFSSL_HAVE_SP_ECC
         //#define WOLFSSL_SP_NO_256
-        //#define WOLFSSL_SP_384
+        #define WOLFSSL_SP_384
         //#define WOLFSSL_SP_521
     #endif
     #if WOLF_CONF_MATH == 6 || WOLF_CONF_MATH == 7

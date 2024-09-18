@@ -85,7 +85,8 @@ void wolf_shell(void* argument)
         printf("Please select one of the above options:\n");
 
         do {
-            halRet = HAL_UART_Receive(&HAL_CONSOLE_UART, buffer, sizeof(buffer), 100);
+            vTaskDelay(1); /* give time to other threads */
+            halRet = HAL_UART_Receive(&HAL_CONSOLE_UART, buffer, sizeof(buffer), 10);
         } while (halRet != HAL_OK || buffer[0] == '\n' || buffer[0] == '\r');
 
         switch (buffer[0]) {
